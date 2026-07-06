@@ -63,6 +63,47 @@ async def handle_callback(callback: types.CallbackQuery):
         total = sum(item["price"] for item in items)
         text = "🛒 Your Cart:\n\n" + "\n".join([f"• {i['name']}" for i in items]) + f"\n\nTotal: XCG {total:.2f}"
         await callback.message.edit_text(text)
+       elif callback.data == "place_order":
+        user_id = callback.from_user.id
+
+        if not cart.get(user_id):
+            await callback.answer("Cart is empty!")
+            return
+
+        items = cart[user_id]
+        total = sum(item["price"] for item in items)
+
+        order_text = "🧾 NEW ORDER\n\n"
+        order_text += "\n".join([f"- {i['name']} XCG {i['price']:.2f}" for i in items])
+        order_text += f"\n\nTOTAL: XCG {total:.2f}"
+
+        await callback.message.edit_text(
+            "✅ Order placed!\n\n" + order_text,
+            reply_markup=get_main_menu()
+        )
+
+        cart[user_id] = []
+        elif callback.data == "show_cart":
+        user_id = callback.from_user.id
+
+        if not cart.get(user_id):
+            await callback.answer("Cart is empty!")
+            return
+
+        items = cart[user_id]
+        total = sum(item["price"] for item in items)
+
+        text = "🛒 Your Cart\n\n"
+        text += "\n".join([f"• {i['name']} - XCG {i['price']:.2f}" for i in items])
+        text += f"\n\n💰 Total: XCG {total:.2f}"
+
+        kb = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="➕ Continue Shopping", callback_data="show_menu")],
+            [InlineKeyboardButton(text="✅ Place Order", callback_data="place_order")],
+            [InlineKeyboardButton(text="🏠 Main Menu", callback_data="back_main")]
+        ])
+
+        await callback.message.edit_text(text, reply_markup=kb)
 
 async def main():
     logging.basicConfig(level=logging.INFO)
