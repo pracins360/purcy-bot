@@ -1,9 +1,10 @@
 services:
-  - type: web
+  - type: worker
     name: purcy-bot
-    runtime: python
+    env: python
     buildCommand: pip install -r requirements.txt
     startCommand: python bot.py
+    runtime: python
     envVars:
-      - key: BOT_TOKEN
-        sync: false
+      - key: PYTHON_VERSION
+        value: 3.11.9
